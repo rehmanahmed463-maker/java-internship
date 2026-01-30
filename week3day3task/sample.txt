@@ -1,0 +1,11 @@
+Java is a programming language.
+We are learning file handling.
+This is sample text file.
+You can use any content here.
+File reading is important.
+BufferedReader is useful.
+FileReader reads character by character.
+We will count words.
+We will count lines.
+We will count characters.
+End of file.

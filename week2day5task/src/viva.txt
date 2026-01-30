@@ -1,0 +1,28 @@
+1️⃣ What is Fail-Fast vs Fail-Safe?
+
+Answer:
+Fail-Fast iterators immediately throw ConcurrentModificationException if the collection is modified during iteration.
+Fail-Safe iterators do not throw exceptions because they work on a separate copy of the collection, allowing safe modification during iteration.
+
+2️⃣ Why does ConcurrentModificationException occur?
+
+Answer:
+It occurs when we modify a collection structurally (add/remove elements) while iterating using an iterator of Fail-Fast collections (like ArrayList, HashMap).
+Java detects this unexpected modification using modCount and throws the exception to prevent inconsistent behavior.
+
+3️⃣ Real-World Example of Fail-Safe Usage
+
+Answer:
+Fail-Safe is useful where real-time updates are needed while iterating, like:
+Hospital emergency doctor list, live user session tracking, notification systems, stock data processing.
+Collections like CopyOnWriteArrayList and ConcurrentHashMap are used.
+
+4️⃣ Difference Between Iterator and ListIterator
+
+Answer:
+
+Iterator	ListIterator
+Works for List and Set	Works only for List
+Forward traversal only	Can traverse forward & backward
+Cannot add elements during iteration	Can add, remove, modify elements
+Interface in java.util	Interface in java.util
