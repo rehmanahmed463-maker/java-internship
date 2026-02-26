@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Login</title>
+    <link rel="stylesheet" href="/css/payroll.css">
+</head>
+<body>
+
+<div class="header">
+    <div class="icon">💰</div>
+    <h1><span class="big">Payroll</span> <span class="big">System</span></h1>
+</div>
+
+<div class="wrapper">
+    <div class="panel">
+        <p class="panel-title">Login Area</p>
+
+        <!-- error message (same page) -->
+        <div class="alert" id="errorBox">Invalid credentials. Please try again.</div>
+
+        <!-- Spring Security needs username/password + post to /login -->
+        <form class="login-box" method="post" action="/login">
+            <label>LoginName :</label>
+            <input type="text" name="username" required>
+
+            <label>Password :</label>
+            <input type="password" name="password" required>
+
+            <button class="btn" type="submit">Login</button>
+
+            <div class="radio-row">
+                <label><input type="radio" name="type" value="ADMIN" checked> Admin</label>
+                <label><input type="radio" name="type" value="EMPLOYEE"> Employee</label>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="footer">
+    www.yourcollegeproject.com
+    <small>Copyright © Payroll System</small>
+</div>
+
+<!-- show error only when URL has ?error -->
+<script>
+    if (window.location.search.includes("error")) {
+      document.getElementById("errorBox").style.display = "block";
+    }
+</script>
+
+</body>
+</html>

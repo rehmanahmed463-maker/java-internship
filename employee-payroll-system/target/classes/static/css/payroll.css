@@ -1,0 +1,151 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #dff6df; /* light green background */
+  color: #084b08;
+}
+
+/* Top header */
+.header {
+  width: 100%;
+  background: #c8f0c8;
+  border-bottom: 2px solid #2e8b2e;
+  padding: 18px 10px;
+  text-align: center;
+  position: relative;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.header h1 .big {
+  color: #1f7a1f;
+}
+
+.header h1 .small {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0b5f0b;
+}
+
+.header .icon {
+  position: absolute;
+  left: 18px;
+  top: 12px;
+  font-size: 44px;
+  color: #1f7a1f;
+}
+
+/* Main layout */
+.wrapper {
+  min-height: calc(100vh - 120px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+}
+
+.panel {
+  width: 520px;
+  background: #e8ffe8;
+  border: 2px solid #2e8b2e;
+  border-radius: 6px;
+  padding: 18px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+.panel-title {
+  text-align: center;
+  font-weight: 800;
+  color: #0b5f0b;
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+/* Login box (center small box like screenshot) */
+.login-box {
+  width: 280px;
+  margin: 0 auto;
+  background: #d4f7d4;
+  border: 2px solid #2e8b2e;
+  padding: 14px 14px 12px;
+}
+
+label {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid #2e8b2e;
+  outline: none;
+  background: #f3fff3;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+  box-shadow: 0 0 0 2px rgba(46,139,46,0.20);
+}
+
+.btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 7px 10px;
+  background: #2e8b2e;
+  color: #fff;
+  border: 0;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #257225;
+}
+
+/* radio row */
+.radio-row {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  color: #0b5f0b;
+}
+
+/* Error box like login error */
+.alert {
+  display: none;
+  margin: 0 auto 10px;
+  width: 280px;
+  background: #ffe3e3;
+  border: 1px solid #cc6c6c;
+  color: #7b1f1f;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Footer text */
+.footer {
+  text-align: center;
+  padding: 14px 10px 18px;
+  color: #0b5f0b;
+  font-weight: 800;
+}
+
+.footer small {
+  display: block;
+  margin-top: 8px;
+  font-weight: 700;
+  color: #2a6f2a;
+}

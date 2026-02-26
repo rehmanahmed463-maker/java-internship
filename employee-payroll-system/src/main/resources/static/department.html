@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Add Department</title>
+    <link rel="stylesheet" href="/css/department.css">
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+
+
+    <div class="content">
+        <h2 class="section-title">Add Department</h2>
+
+        <div class="card">
+            <div id="successBox" class="msg success"></div>
+            <div id="errorBox" class="msg error"></div>
+
+            <form method="post" action="/admin/departments/add">
+                <div class="grid">
+                    <div>
+                        <label>Department Name</label>
+                        <input type="text" name="name" placeholder="e.g. IT, HR, Legal, Software Development" required>
+                    </div>
+
+                    <button class="btn" type="submit">Save Department</button>
+
+                    <a class="back-link" href="/dashboard.html">← Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
+
+    if (success) {
+      const box = document.getElementById("successBox");
+      box.textContent = decodeURIComponent(success);
+      box.style.display = "block";
+    }
+    if (error) {
+      const box = document.getElementById("errorBox");
+      box.textContent = decodeURIComponent(error);
+      box.style.display = "block";
+    }
+</script>
+
+</body>
+</html>

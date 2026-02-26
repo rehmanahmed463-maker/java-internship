@@ -1,0 +1,139 @@
+/* ===== PAYSLIP PAGE STYLING ===== */
+
+body {
+    background: #f4fff4;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    color: #000;
+}
+
+/* Main slip container */
+.slip {
+    max-width: 900px;
+    margin: 20px auto;
+    background: #ffffff;
+    border: 2px solid #0a7a0a;
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+}
+
+/* Header */
+.slip-header {
+    text-align: center;
+    border-bottom: 2px solid #0a7a0a;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+}
+
+.slip-header h2 {
+    margin: 0;
+    font-size: 26px;
+    color: #0a7a0a;
+    letter-spacing: 1px;
+}
+
+.slip-header p {
+    margin: 4px 0 0;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Employee meta info */
+.meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.meta div {
+    padding: 8px 10px;
+    border: 1px solid #0a7a0a;
+    border-radius: 8px;
+    font-weight: 700;
+    background: #f3fff3;
+}
+
+/* Tables */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+
+th, td {
+    border: 1px solid #0a7a0a;
+    padding: 10px;
+    font-weight: 700;
+}
+
+th {
+    background: #0a7a0a;
+    color: #ffffff;
+    text-align: left;
+}
+
+/* Totals table */
+.totals {
+    margin-top: 14px;
+}
+
+.totals th {
+    width: 50%;
+}
+
+/* Signature section */
+.signatures {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    font-weight: 700;
+}
+
+.signature-line {
+    width: 45%;
+    border-top: 1px solid #000;
+    padding-top: 6px;
+    text-align: center;
+}
+
+/* Footer note */
+.note {
+    text-align: center;
+    margin-top: 18px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #333;
+}
+
+/* Print bar */
+.print-bar {
+    max-width: 900px;
+    margin: 14px auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Print-specific rules */
+@media print {
+    body {
+        background: #ffffff;
+    }
+    .header,
+    .footer,
+    .print-bar {
+        display: none !important;
+    }
+    .slip {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+}

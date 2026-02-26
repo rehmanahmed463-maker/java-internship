@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Salary</title>
+    <link rel="stylesheet" href="/css/department.css">
+
+    <style>
+        .card{
+          background:#fff;
+          border:2px solid #0a7a0a;
+          border-radius:16px;
+          padding:16px;
+          box-shadow:0 10px 22px rgba(0,0,0,0.10);
+          max-width: 980px;
+        }
+
+        .toolbar{
+          display:grid;
+          grid-template-columns: 1fr auto;
+          gap:12px;
+          align-items:end;
+          margin-bottom: 12px;
+        }
+
+        .field label{
+          display:block;
+          font-weight:900;
+          color:#0b5f0b;
+          margin-bottom:6px;
+        }
+
+        .field input{
+          width:100%;
+          padding:12px 12px;
+          border:2px solid #cdeecd;
+          border-radius:12px;
+          outline:none;
+          background:#f3fff3;
+          font-size:14px;
+          font-weight:800;
+          color:#0b5f0b;
+        }
+        .field input:focus{
+          border-color:#4f7cff;
+          box-shadow:0 0 0 3px rgba(79,124,255,0.18);
+        }
+
+        .table-wrap{overflow:auto; border-radius:14px; border:2px solid #0a7a0a;}
+        table{width:100%; border-collapse:collapse; background:#fff;}
+        th,td{border:1px solid #0a7a0a; padding:10px; text-align:left; font-weight:700;}
+        th{background:#0a7a0a; color:#fff; position:sticky; top:0;}
+        .muted{color:#0b5f0b; font-weight:900; margin:6px 0 12px;}
+        .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+    <div class="sidebar">
+        <a href="/dashboard.html">Home</a>
+        <a href="/add-department.html">Add Department</a>
+        <a href="/add-employee.html">Add Employee</a>
+        <a href="/employee-report.html">Employee Report</a>
+        <a class="active" href="/salary.html">Salary</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="content">
+        <h2 class="section-title">Salary (Manual Payslip Generation)</h2>
+
+        <div class="card">
+
+            <div class="muted">Search employee, select one or many, then generate (password protected).</div>
+
+            <div class="toolbar">
+                <div class="field">
+                    <label>Month (YYYY-MM)</label>
+                    <input id="month" placeholder="2026-02">
+                </div>
+
+                <button class="btn" onclick="generateSelected()">Generate Selected Payslips</button>
+            </div>
+
+            <div class="field" style="margin-bottom:12px;">
+                <label>Search Employee Name</label>
+                <input id="searchEmp" placeholder="type employee name..." onkeyup="filterEmp()">
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                    </tr>
+                    </thead>
+                    <tbody id="empList">
+                    <tr><td colspan="4" style="text-align:center;font-weight:900;">Loading employees...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="actions">
+                <a class="back-link" href="/dashboard.html">← Back to Dashboard</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    let allEmployees = [];
+    const empBody = document.getElementById("empList");
+
+    // default current month
+    const now = new Date();
+    document.getElementById("month").value =
+      now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+
+    function render(list){
+      empBody.innerHTML = "";
+      if(!list || list.length === 0){
+        empBody.innerHTML = `<tr><td colspan="4" style="text-align:center;font-weight:900;">No employees found</td></tr>`;
+        return;
+      }
+
+      list.forEach(e => {
+        empBody.innerHTML += `
+          <tr>
+            <td><input type="checkbox" value="${e.id}"></td>
+            <td>${e.fullName ?? ""}</td>
+            <td>${e.department?.name ?? ""}</td>
+            <td>${e.designation ?? ""}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterEmp(){
+      const q = document.getElementById("searchEmp").value.toLowerCase();
+      render(allEmployees.filter(e => (e.fullName || "").toLowerCase().includes(q)));
+    }
+
+    async function loadAllEmployees(){
+      const res = await fetch("/api/employees-all");
+      if(!res.ok){
+        empBody.innerHTML = `<tr><td colspan="4" style="text-align:center;font-weight:900;color:#7b1f1f;">
+          Failed to load employees (check API/security)
+        </td></tr>`;
+        return;
+      }
+      allEmployees = await res.json();
+      render(allEmployees);
+    }
+
+    async function generateSelected(){
+      const ids = [...document.querySelectorAll("#empList input[type=checkbox]:checked")].map(c => c.value);
+
+      if(ids.length === 0){
+        alert("Select at least one employee");
+        return;
+      }
+
+      const pwd = prompt("Enter your login password to generate payslips:");
+      if(!pwd) return;
+
+      const form = new URLSearchParams();
+      form.append("month", document.getElementById("month").value);
+      form.append("password", pwd);
+      ids.forEach(i => form.append("employeeIds", i));
+
+      const res = await fetch("/admin/payroll/generate-selected", {
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"},
+        body:form.toString()
+      });
+
+      alert(await res.text());
+    }
+
+    loadAllEmployees();
+</script>
+
+</body>
+</html>

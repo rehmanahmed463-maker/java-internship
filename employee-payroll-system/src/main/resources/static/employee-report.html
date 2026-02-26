@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Employee Report</title>
+    <link rel="stylesheet" href="/css/department.css">
+    <style>
+        /* Department bar */
+        .dept-bar {
+          margin: 16px auto 0;
+          max-width: 900px;
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding: 10px 8px;
+          border: 2px solid #0a7a0a;
+          border-radius: 14px;
+          background: #eaffea;
+        }
+
+        .dept-chip {
+          flex: 0 0 auto;
+          padding: 10px 14px;
+          border: 2px solid #0a7a0a;
+          border-radius: 12px;
+          background: #ffffff;
+          font-weight: 900;
+          color: #0b5f0b;
+          cursor: pointer;
+          transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+          user-select: none;
+          white-space: nowrap;
+        }
+
+        /* hover pop */
+        .dept-chip:hover {
+          transform: translateY(-2px) scale(1.03);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+          background: #c8f0c8;
+        }
+
+        .dept-chip.active {
+          background: #c8f0c8;
+          outline: 3px solid rgba(79,124,255,0.25);
+        }
+
+        /* Table */
+        .table-card {
+          margin: 16px auto 0;
+          max-width: 900px;
+          background: #fff;
+          border: 2px solid #0a7a0a;
+          border-radius: 16px;
+          padding: 12px;
+          box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          font-size: 14px;
+          background: white;
+        }
+        th, td {
+          border: 1px solid #0a7a0a;
+          padding: 10px;
+          text-align: left;
+        }
+        th {
+          background: #0a7a0a;
+          color: white;
+        }
+
+        .hint {
+          margin: 10px auto 0;
+          max-width: 900px;
+          font-weight: 800;
+          color: #0b5f0b;
+        }
+
+        /* ✅ Step 1: Search bar style (same size as inputs) */
+        .search-wrap {
+          max-width: 900px;
+          margin: 12px auto 0;
+        }
+
+        #searchInput {
+          width: 100%;
+          padding: 12px 12px;
+          border: 2px solid #cdeecd;
+          border-radius: 12px;
+          outline: none;
+          background: #f3fff3;
+          font-size: 14px;
+          font-weight: 700;
+          color: #0b5f0b;
+        }
+
+        #searchInput:focus {
+          border-color: #4f7cff;
+          box-shadow: 0 0 0 3px rgba(79,124,255,0.18);
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+
+    <div class="content">
+        <h2 class="section-title">Employee Report (Department-wise)</h2>
+
+        <div class="hint">Select a department to view its employees:</div>
+
+        <!-- Department scroller bar -->
+        <div id="deptBar" class="dept-bar"></div>
+
+        <!-- ✅ Step 1: Search bar (filters by Full Name) -->
+        <div class="search-wrap">
+            <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search employee by name..."
+                    onkeyup="filterEmployees()"
+                    disabled
+            />
+        </div>
+
+        <!-- Employees table -->
+        <div class="table-card">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Designation</th>
+                    <th>Basic Salary</th>
+                    <th>Joining Date</th>
+                </tr>
+                </thead>
+                <tbody id="empBody">
+                <tr>
+                    <td colspan="7" style="text-align:center; font-weight:800;">
+                        Choose a department to load employees
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a class="back-link" href="/dashboard.html" style="display:block; margin-top:14px;">← Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    const deptBar = document.getElementById("deptBar");
+    const empBody = document.getElementById("empBody");
+    const searchInput = document.getElementById("searchInput");
+
+    function setActive(deptId) {
+      document.querySelectorAll(".dept-chip").forEach(x => x.classList.remove("active"));
+      const btn = document.querySelector(`.dept-chip[data-id="${deptId}"]`);
+      if (btn) btn.classList.add("active");
+    }
+
+    function renderEmployees(list) {
+      empBody.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        empBody.innerHTML = `
+          <tr>
+            <td colspan="7" style="text-align:center; font-weight:800;">
+              No employees found in this department
+            </td>
+          </tr>`;
+        return;
+      }
+
+      list.forEach(e => {
+        const jd = e.joiningDate ? e.joiningDate : "-";
+        empBody.innerHTML += `
+          <tr>
+            <td>${e.id}</td>
+            <td>${e.fullName ?? ""}</td>
+            <td>${e.email ?? ""}</td>
+            <td>${e.phone ?? ""}</td>
+            <td>${e.designation ?? ""}</td>
+            <td>${e.basicSalary ?? ""}</td>
+            <td>${jd}</td>
+          </tr>`;
+      });
+
+      // after rendering, apply current search filter
+      filterEmployees();
+    }
+
+    async function loadEmployees(deptId) {
+      setActive(deptId);
+
+      // enable search now that department employees loaded
+      searchInput.disabled = false;
+      searchInput.value = "";
+
+      empBody.innerHTML = `
+        <tr><td colspan="7" style="text-align:center; font-weight:800;">Loading...</td></tr>
+      `;
+
+      const res = await fetch(`/api/employees?departmentId=${deptId}`);
+      const data = await res.json();
+      renderEmployees(data);
+    }
+
+    // ✅ Step 1: filter by employee name (Full Name column = 2nd column)
+    function filterEmployees() {
+      const q = (searchInput.value || "").toLowerCase();
+      const rows = document.querySelectorAll("#empBody tr");
+
+      rows.forEach(row => {
+        const nameCell = row.children[1];
+        if (!nameCell) return;
+
+        const name = (nameCell.innerText || "").toLowerCase();
+        row.style.display = name.includes(q) ? "" : "none";
+      });
+    }
+
+    // Load departments on page open
+    fetch("/api/departments")
+      .then(res => res.json())
+      .then(depts => {
+        deptBar.innerHTML = "";
+
+        depts.forEach(d => {
+          const btn = document.createElement("div");
+          btn.className = "dept-chip";
+          btn.dataset.id = d.id;
+          btn.textContent = d.name;
+
+          btn.addEventListener("click", () => {
+            // update URL for refresh/back support
+            const url = new URL(window.location);
+            url.searchParams.set("deptId", d.id);
+            history.replaceState({}, "", url);
+
+            loadEmployees(d.id);
+          });
+
+          deptBar.appendChild(btn);
+        });
+
+        // auto-load if deptId is in URL
+        const deptId = new URLSearchParams(window.location.search).get("deptId");
+        if (deptId) loadEmployees(deptId);
+      })
+      .catch(err => {
+        console.error(err);
+        deptBar.innerHTML = `<div style="font-weight:900;color:#7b1f1f;">Failed to load departments</div>`;
+      });
+</script>
+
+</body>
+</html>

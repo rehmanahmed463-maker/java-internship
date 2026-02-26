@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Payslip</title>
+    <link rel="stylesheet" href="/css/department.css">
+    <link rel="stylesheet" href="/css/payslip.css">
+
+</head>
+<body>
+
+<div class="header"><h1>💰 Payroll System</h1></div>
+
+<div class="print-bar">
+    <a class="back-link" href="/salary-report.html">← Back to Salary Report</a>
+    <button class="btn" onclick="window.print()">Print Slip</button>
+</div>
+
+<div class="slip" id="slip">
+    <div class="top">
+        <h2>Payslip</h2>
+        <div id="companyLine">Payroll Management System</div>
+    </div>
+
+    <div class="meta" id="meta">Loading...</div>
+
+    <div class="two-col">
+        <table>
+            <thead>
+            <tr><th colspan="2">Earnings</th></tr>
+            <tr><th>Type</th><th>Amount</th></tr>
+            </thead>
+            <tbody id="earn"></tbody>
+        </table>
+
+        <table>
+            <thead>
+            <tr><th colspan="2">Deductions</th></tr>
+            <tr><th>Type</th><th>Amount</th></tr>
+            </thead>
+            <tbody id="ded"></tbody>
+        </table>
+    </div>
+
+    <table style="margin-top:12px;">
+        <tbody id="totals"></tbody>
+    </table>
+
+    <div style="display:flex;justify-content:space-between;margin-top:25px;font-weight:800;">
+        <div>Employer Signature: ____________________</div>
+        <div>Employee Signature: ____________________</div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px;font-weight:800;">
+        This is a system generated payslip
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    const id = new URLSearchParams(window.location.search).get("id");
+
+    fetch(`/api/payslip/${id}`)
+      .then(r => r.json())
+      .then(p => {
+        if(!p){
+          document.getElementById("meta").innerHTML = "Payslip not found";
+          return;
+        }
+
+        const emp = p.employee || {};
+        const dept = emp.department || {};
+
+        document.getElementById("meta").innerHTML = `
+          <div><b>Employee:</b> ${emp.fullName ?? ""}</div>
+          <div><b>Department:</b> ${dept.name ?? ""}</div>
+          <div><b>Designation:</b> ${emp.designation ?? ""}</div>
+          <div><b>Pay Month:</b> ${p.payMonth}</div>
+          <div><b>Worked Days:</b> ${(p.workedDays ?? "-")} / ${(p.totalDays ?? "-")}</div>
+          <div><b>Generated At:</b> ${p.generatedAt ?? ""}</div>
+        `;
+
+        document.getElementById("earn").innerHTML = `
+          <tr><td>Basic</td><td>${p.basic}</td></tr>
+          <tr><td>HRA</td><td>${p.hra}</td></tr>
+          <tr><td>Incentive</td><td>${p.incentive}</td></tr>
+        `;
+
+        document.getElementById("ded").innerHTML = `
+          <tr><td>PF</td><td>${p.pf}</td></tr>
+          <tr><td>Professional Tax</td><td>${p.professionalTax}</td></tr>
+        `;
+
+        document.getElementById("totals").innerHTML = `
+          <tr><th style="width:50%;">Total Earnings</th><td>${p.totalEarnings}</td></tr>
+          <tr><th>Total Deductions</th><td>${p.totalDeductions}</td></tr>
+          <tr><th>Net Pay</th><td><b>${p.netPay}</b></td></tr>
+        `;
+      })
+      .catch(() => {
+        document.getElementById("meta").innerHTML = "Error loading payslip";
+      });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Details</title>
+    <link rel="stylesheet" href="/css/department.css">
+
+    <style>
+        .box {
+          max-width: 900px;
+          margin: 16px auto;
+          background: #fff;
+          border: 2px solid #0a7a0a;
+          border-radius: 16px;
+          padding: 16px;
+          box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+        }
+
+        .row2 {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .full {
+          grid-column: 1 / -1;
+        }
+
+        select, input[type="text"]{
+          width: 100%;
+          padding: 12px 12px;
+          border: 2px solid #cdeecd;
+          border-radius: 12px;
+          outline: none;
+          background: #f3fff3;
+          font-size: 14px;
+          font-weight: 700;
+          color: #0b5f0b;
+        }
+
+        select:focus, input[type="text"]:focus {
+          border-color: #4f7cff;
+          box-shadow: 0 0 0 3px rgba(79,124,255,0.18);
+        }
+
+        .details {
+          margin-top: 14px;
+          border-top: 2px dashed #0a7a0a;
+          padding-top: 14px;
+        }
+
+        .kv {
+          display: grid;
+          grid-template-columns: 160px 10px 1fr;
+          row-gap: 8px;
+          font-weight: 800;
+          color: #0b5f0b;
+        }
+
+        .kv .v { color: #111; font-weight: 700; }
+
+        /* ✅ Print only details */
+        @media print {
+          body * { visibility: hidden; }
+          #printArea, #printArea * { visibility: visible; }
+          #printArea { position: absolute; left: 0; top: 0; width: 100%; }
+          .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header no-print">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+    <div class="content">
+        <h2 class="section-title">Employee Details (Print)</h2>
+
+        <div class="box no-print">
+            <div class="row2">
+                <div>
+                    <label>Select Department</label>
+                    <select id="deptSelect">
+                        <option value="">-- Select Department --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Search Employee Name</label>
+                    <input id="searchName" type="text" placeholder="type name..." disabled>
+                </div>
+
+                <div class="full">
+                    <label>Select Employee</label>
+                    <select id="empSelect" disabled>
+                        <option value="">-- Select Employee --</option>
+                    </select>
+                </div>
+
+                <button class="btn full" id="printBtn" type="button" disabled onclick="window.print()">
+                    🖨 Print Employee Details
+                </button>
+
+                <a class="back-link full" href="/employee-report.html">← Back to Employee Report</a>
+            </div>
+        </div>
+
+        <!-- ✅ This area will print -->
+        <div class="box" id="printArea">
+            <h3 style="text-align:center; margin:0;">Employee Details</h3>
+
+            <div class="details">
+                <div class="kv">
+                    <div>Name</div><div>:</div><div class="v" id="d_name">-</div>
+                    <div>Email</div><div>:</div><div class="v" id="d_email">-</div>
+                    <div>Phone</div><div>:</div><div class="v" id="d_phone">-</div>
+                    <div>Department</div><div>:</div><div class="v" id="d_dept">-</div>
+                    <div>Designation</div><div>:</div><div class="v" id="d_desig">-</div>
+                    <div>Basic Salary</div><div>:</div><div class="v" id="d_salary">-</div>
+                    <div>Joining Date</div><div>:</div><div class="v" id="d_join">-</div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer no-print">Developed for Final Year Project</div>
+
+<script>
+    const deptSelect = document.getElementById("deptSelect");
+    const empSelect  = document.getElementById("empSelect");
+    const searchName = document.getElementById("searchName");
+    const printBtn   = document.getElementById("printBtn");
+
+    let currentEmployees = [];
+
+    function setDetails(e) {
+      document.getElementById("d_name").innerText = e.fullName ?? "-";
+      document.getElementById("d_email").innerText = e.email ?? "-";
+      document.getElementById("d_phone").innerText = e.phone ?? "-";
+      document.getElementById("d_desig").innerText = e.designation ?? "-";
+      document.getElementById("d_salary").innerText = e.basicSalary ?? "-";
+      document.getElementById("d_join").innerText = e.joiningDate ?? "-";
+
+      // if your API returns department object
+      document.getElementById("d_dept").innerText = (e.department && e.department.name) ? e.department.name : "-";
+    }
+
+    function renderEmployeeOptions(list) {
+      empSelect.innerHTML = `<option value="">-- Select Employee --</option>`;
+      list.forEach(e => {
+        const opt = document.createElement("option");
+        opt.value = e.id;
+        opt.textContent = e.fullName;
+        empSelect.appendChild(opt);
+      });
+    }
+
+    function filterEmployeeList() {
+      const q = (searchName.value || "").toLowerCase();
+      const filtered = currentEmployees.filter(e => (e.fullName || "").toLowerCase().includes(q));
+      renderEmployeeOptions(filtered);
+    }
+
+    // Load departments
+    fetch("/api/departments")
+      .then(res => res.json())
+      .then(depts => {
+        depts.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          deptSelect.appendChild(opt);
+        });
+      });
+
+    // On department change → load employees
+    deptSelect.addEventListener("change", async () => {
+      const deptId = deptSelect.value;
+
+      empSelect.disabled = true;
+      searchName.disabled = true;
+      printBtn.disabled = true;
+      searchName.value = "";
+      currentEmployees = [];
+      renderEmployeeOptions([]);
+
+      if (!deptId) return;
+
+      const res = await fetch(`/api/employees?departmentId=${deptId}`);
+      const list = await res.json();
+      currentEmployees = list || [];
+
+      empSelect.disabled = false;
+      searchName.disabled = false;
+
+      renderEmployeeOptions(currentEmployees);
+    });
+
+    // Search typing
+    searchName.addEventListener("keyup", filterEmployeeList);
+
+    // On employee select → fetch full details and show + enable print
+    empSelect.addEventListener("change", async () => {
+      const id = empSelect.value;
+      printBtn.disabled = true;
+
+      if (!id) {
+        setDetails({});
+        return;
+      }
+
+      const res = await fetch(`/api/employee/${id}`);
+      if (!res.ok) {
+        alert("Employee not found");
+        return;
+      }
+      const emp = await res.json();
+      setDetails(emp);
+      printBtn.disabled = false;
+    });
+</script>
+
+</body>
+</html>

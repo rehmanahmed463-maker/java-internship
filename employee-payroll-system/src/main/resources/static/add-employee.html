@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Add Employee</title>
+    <link rel="stylesheet" href="/css/department.css">
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+
+
+    <div class="content">
+        <h2 class="section-title">Add Employee</h2>
+
+        <div class="card">
+            <div id="successBox" class="msg success"></div>
+            <div id="errorBox" class="msg error"></div>
+
+            <p style="margin:0 0 12px; font-weight:800; color:#0b5f0b;">
+                Note: Enter Department ID (example: IT=1, HR=2). We will add dropdown later.
+            </p>
+
+            <form method="post" action="/admin/employees/add">
+                <div class="grid">
+
+                    <div>
+                        <label>Full Name</label>
+                        <input type="text" name="fullName" required>
+                    </div>
+
+                    <div>
+                        <label>Email</label>
+                        <input type="text" name="email" required>
+                    </div>
+
+                    <div>
+                        <label>Phone</label>
+                        <input type="text" name="phone">
+                    </div>
+
+                    <div>
+                        <label>Designation</label>
+                        <input type="text" name="designation" placeholder="Manager / HR / Developer" required>
+                    </div>
+
+                    <div>
+                        <label>Basic Salary</label>
+                        <input type="text" name="basicSalary" placeholder="e.g. 35000" required>
+                    </div>
+
+                    <div>
+                        <label>Joining Date</label>
+                        <input type="text" name="joiningDate" placeholder="yyyy-mm-dd (optional)">
+                    </div>
+
+                    <div>
+                        <label>Department</label>
+                        <select name="departmentId" id="departmentSelect" required>
+                            <option value="">-- Select Department --</option>
+                        </select>
+                    </div>
+
+
+                    <button class="btn" type="submit">Save Employee</button>
+
+                    <a class="back-link" href="/dashboard.html">← Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    fetch("/api/departments")
+      .then(res => res.json())
+      .then(data => {
+        const select = document.getElementById("departmentSelect");
+        data.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          select.appendChild(opt);
+        });
+      })
+      .catch(err => {
+        alert("Failed to load departments");
+        console.error(err);
+      });
+
+    // success/error message logic (keep this)
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get("success");
+    const error = params.get("error");
+
+    if (success) {
+      document.getElementById("successBox").textContent = decodeURIComponent(success);
+      document.getElementById("successBox").style.display = "block";
+    }
+    if (error) {
+      document.getElementById("errorBox").textContent = decodeURIComponent(error);
+      document.getElementById("errorBox").style.display = "block";
+    }
+</script>
+
+
+</body>
+</html>

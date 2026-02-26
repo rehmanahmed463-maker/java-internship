@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Payroll System - Salary Report</title>
+    <link rel="stylesheet" href="/css/department.css">
+    <link rel="stylesheet" href="/css/salary-report.css">
+</head>
+<body>
+
+<div class="header">
+    <h1>💰 Payroll System</h1>
+</div>
+
+<div class="main">
+    <div class="sidebar">
+        <a href="/dashboard.html">Home</a>
+        <a href="/salary.html">Generate Salary</a>
+        <a class="active" href="/salary-report.html">Salary Report</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <div class="content">
+        <h2 class="section-title">Salary Report</h2>
+
+        <!-- Filters -->
+        <div class="card">
+            <div class="filters">
+                <div class="field">
+                    <label>Month (YYYY-MM)</label>
+                    <input id="month" placeholder="2026-02">
+                </div>
+
+                <div class="field">
+                    <label>Department</label>
+                    <select id="dept">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Search Employee</label>
+                    <input id="search" placeholder="Search employee name...">
+                </div>
+
+                <div class="field btn-wrap">
+                    <button class="btn" onclick="applyFilter()">Apply Filters</button>
+                </div>
+            </div>
+
+            <div class="hint" id="hintText">Loading payslips...</div>
+
+            <!-- Table -->
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Slip ID</th>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Month</th>
+                        <th>Worked Days</th>
+                        <th>Net Pay</th>
+                        <th>Action</th>
+                    </tr>
+                    </thead>
+                    <tbody id="rows">
+                    <tr><td colspan="7" class="center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <a class="back-link" href="/dashboard.html" style="display:inline-block;margin-top:14px;">← Back to Dashboard</a>
+    </div>
+</div>
+
+<div class="footer">Developed for Final Year Project</div>
+
+<script>
+    const monthEl = document.getElementById("month");
+    const deptEl  = document.getElementById("dept");
+    const searchEl= document.getElementById("search");
+    const rowsEl  = document.getElementById("rows");
+    const hintEl  = document.getElementById("hintText");
+
+    let allSlips = [];
+
+    // default month
+    const now = new Date();
+    monthEl.value = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+
+    async function loadDepartments() {
+      try{
+        const res = await fetch("/api/departments");
+        const depts = await res.json();
+
+        depts.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d.id;
+          opt.textContent = d.name;
+          deptEl.appendChild(opt);
+        });
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    function render(list){
+      rowsEl.innerHTML = "";
+
+      if(!list || list.length === 0){
+        rowsEl.innerHTML = `<tr><td colspan="7" class="center">No payslips found for selected filters</td></tr>`;
+        return;
+      }
+
+      list.forEach(p => {
+        const empName = p.employee?.fullName ?? "";
+        const deptName = p.employee?.department?.name ?? "";
+        const worked = (p.workedDays ?? "-") + "/" + (p.totalDays ?? "-");
+
+        rowsEl.innerHTML += `
+          <tr>
+            <td>${p.id}</td>
+            <td>${empName}</td>
+            <td>${deptName}</td>
+            <td>${p.payMonth}</td>
+            <td>${worked}</td>
+            <td>₹ ${p.netPay}</td>
+            <td>
+              <button class="btn-small" onclick="viewSlip(${p.id})">View Slip</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    async function loadPayslipsByMonth(month){
+      hintEl.textContent = "Loading payslips...";
+      rowsEl.innerHTML = `<tr><td colspan="7" class="center">Loading...</td></tr>`;
+
+      const res = await fetch(`/api/payslips?month=${encodeURIComponent(month)}`);
+      if(!res.ok){
+        hintEl.textContent = "Failed to load payslips. Check API/security.";
+        rowsEl.innerHTML = `<tr><td colspan="7" class="center">Error loading payslips</td></tr>`;
+        return;
+      }
+
+      allSlips = await res.json();
+      hintEl.textContent = `Found ${allSlips.length} payslip(s) for ${month}`;
+      applyFilter(); // apply current filter UI on loaded slips
+    }
+
+    function applyFilter(){
+      const deptId = deptEl.value;
+      const q = searchEl.value.trim().toLowerCase();
+      const month = monthEl.value.trim();
+
+      // if user changed month, reload from server for that month
+      // (to avoid mixing months in UI)
+      if (month && (allSlips.length === 0 || (allSlips[0] && allSlips[0].payMonth !== month))) {
+        loadPayslipsByMonth(month);
+        return;
+      }
+
+      let filtered = allSlips;
+
+      if(deptId){
+        filtered = filtered.filter(p => String(p.employee?.department?.id ?? "") === String(deptId));
+      }
+
+      if(q){
+        filtered = filtered.filter(p => (p.employee?.fullName ?? "").toLowerCase().includes(q));
+      }
+
+      render(filtered);
+    }
+
+    function viewSlip(id){
+      window.open(`/payslip.html?id=${id}`, "_blank");
+    }
+
+    // init
+    loadDepartments();
+    loadPayslipsByMonth(monthEl.value);
+
+</script>
+
+</body>
+</html>
